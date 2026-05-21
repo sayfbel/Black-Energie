@@ -1,0 +1,129 @@
+.packs-page {
+    min-height: 100vh;
+    background: #fff;
+}
+
+.packs-header {
+    position: relative;
+    height: 450px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6rem;
+}
+
+.packs-header-content {
+    text-align: center;
+    position: relative;
+    z-index: 3;
+}
+
+.packs-header-content h1 {
+    font-size: 5rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    letter-spacing: 4px;
+}
+
+.packs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10rem;
+    padding-bottom: 10rem;
+}
+
+.pack-item {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 6rem;
+    align-items: center;
+}
+
+.pack-image-container {
+    height: 600px;
+    overflow: hidden;
+    border-radius: 2px;
+}
+
+.pack-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pack-item:hover .pack-image {
+    transform: scale(1.05);
+}
+
+.pack-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.pack-info h2 {
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+    color: #000;
+    line-height: 1.1;
+}
+
+.pack-info p {
+    color: #555;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    max-width: 500px;
+}
+
+@media (max-width: 1024px) {
+    .packs-header {
+        height: 350px;
+        margin-bottom: 4rem;
+    }
+
+    .packs-header-content h1 {
+        font-size: 3.5rem;
+    }
+
+    .pack-item {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        direction: ltr !important;
+    }
+
+    .pack-image-container {
+        height: 400px;
+    }
+
+    .pack-info {
+        text-align: center;
+        align-items: center;
+    }
+
+    .pack-info h2 {
+        font-size: 2.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .pack-info p {
+        font-size: 1rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .packs-container {
+        gap: 6rem;
+        padding-bottom: 6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .packs-header-content h1 {
+        font-size: 2.8rem;
+    }
+    
+    .pack-image-container {
+        height: 300px;
+    }
+}

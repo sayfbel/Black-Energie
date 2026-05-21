@@ -1,0 +1,67 @@
+.offers-nav {
+    background: #fff;
+    color: #000;
+    padding: 0.7rem 0;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    z-index: 1100;
+    transition: all 0.5s ease;
+}
+
+.offers-nav.scrolled {
+    background: #000;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.marquee-content {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee-scroll 60s linear infinite;
+    will-change: transform;
+}
+
+.offer-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 4rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: #000; /* Black for light theme */
+    text-transform: uppercase;
+    transition: color 0.5s ease;
+}
+
+.offers-nav.scrolled .offer-item {
+    color: #c9a050; /* Luxury Gold for dark theme */
+}
+
+.offer-bullet {
+    font-size: 0.5rem;
+    color: currentColor;
+    opacity: 0.3;
+}
+
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Pause on hover to allow reading */
+.offers-nav:hover .marquee-content {
+    animation-play-state: paused;
+}

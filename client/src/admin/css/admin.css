@@ -1,0 +1,66 @@
+/* Admin Global Variables */
+:root {
+  /* ================== COLORS ================== */
+  --admin-primary: #c9a050;
+  --admin-primary-dark: #a67c32;
+  --admin-accent: #f59e0b;
+  
+  --admin-bg-dark: #050505;
+  --admin-bg-card: #0a0a0a;
+  
+  --admin-text-main: #ffffff;
+  --admin-text-muted: #a0a0a0;
+  
+  --admin-danger: #f87171;
+  --admin-danger-bg: rgba(248, 113, 113, 0.1);
+  --admin-success: #4ade80;
+  
+  --admin-border: rgba(255, 255, 255, 0.05);
+  --admin-border-focus: rgba(201, 160, 80, 0.4);
+  --admin-glass: rgba(255, 255, 255, 0.03);
+  --admin-glass-hover: rgba(255, 255, 255, 0.06);
+
+  /* ================== SIZES & SPACING ================== */
+  /* Layout Dimensions */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --header-height: 80px;
+
+  /* Padding & Margin (Spacing) */
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 1rem;      /* 16px */
+  --space-md: 1.5rem;    /* 24px */
+  --space-lg: 2rem;      /* 32px */
+  --space-xl: 3rem;      /* 48px */
+
+  /* Border Radius */
+  --radius-sm: 0.5rem;   /* 8px */
+  --radius-md: 0.75rem;  /* 12px */
+  --radius-lg: 1rem;     /* 16px */
+  --radius-xl: 1.5rem;   /* 24px */
+  --radius-round: 50%;
+
+  /* ================== TYPOGRAPHY ================== */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 2rem;      /* 32px */
+  --text-4xl: 2.5rem;    /* 40px */
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+  --admin-bg-dark: #f8f9fa;
+  --admin-bg-card: #ffffff;
+  --admin-text-main: #111111;
+  --admin-text-muted: #6b7280;
+  --admin-border: #d1d5db; /* A visible light-medium gray */
+  --admin-glass: rgba(0, 0, 0, 0.02);
+  --admin-glass-hover: rgba(0, 0, 0, 0.05);
+}

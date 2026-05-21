@@ -1,0 +1,158 @@
+/* Excellence Grid Accordion Section */
+.excellence-section {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    background: var(--bg-dark);
+    display: flex;
+    overflow: hidden;
+}
+
+
+.excellence-column {
+    position: relative;
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+    transition: flex 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+
+.excellence-column:last-child {
+    border-right: none;
+}
+
+.excellence-column:hover {
+    flex: 2; /* Expand on hover */
+}
+
+.excellence-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4);
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease;
+}
+
+.excellence-column:hover .excellence-img {
+    filter: brightness(0.6);
+    transform: scale(1.05);
+}
+
+.excellence-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.excellence-content h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.excellence-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; /* Massive editorial font */
+    text-transform: uppercase;
+    color: var(--primary);
+    line-height: 0.9;
+    margin-bottom: 1.5rem;
+    font-weight: 900;
+}
+
+
+.excellence-content p {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease 0.2s;
+    line-height: 1.6;
+}
+
+
+.excellence-column:hover .excellence-content p {
+    opacity: 0.8;
+    transform: translateY(0);
+}
+
+.slide-number {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 10rem;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.03);
+    z-index: 1;
+    pointer-events: none;
+    transition: color 0.5s ease;
+}
+
+.excellence-column:hover .slide-number {
+    color: rgba(0, 0, 0, 0.05);
+}
+
+
+/* Gold line at bottom for hover indicator */
+.hover-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s ease;
+}
+
+.excellence-column:hover .hover-indicator {
+    transform: scaleX(1);
+}
+
+@media (max-width: 768px) {
+    .excellence-section {
+        height: 70vh;
+    }
+
+    .excellence-column:hover {
+        flex: 0 0 50% !important; /* Set width to exactly 50% on mobile hover */
+    }
+
+    .excellence-content h2 {
+        font-size: 2rem;
+        line-height: 1.1;
+    }
+
+    .excellence-content p {
+        font-size: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .slide-number {
+        font-size: 5rem;
+    }
+}

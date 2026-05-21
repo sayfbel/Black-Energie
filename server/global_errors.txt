@@ -1,0 +1,14 @@
+500 - File too large - /api/products - POST
+Stack: MulterError: File too large
+    at abortWithCode (C:\Users\hamza\Desktop\co\server\node_modules\multer\lib\make-middleware.js:101:22)
+    at FileStream.<anonymous> (C:\Users\hamza\Desktop\co\server\node_modules\multer\lib\make-middleware.js:211:11)
+    at FileStream.emit (node:events:519:28)
+    at SBMH.ssCb [as _cb] (C:\Users\hamza\Desktop\co\server\node_modules\busboy\lib\types\multipart.js:479:32)
+    at feed (C:\Users\hamza\Desktop\co\server\node_modules\streamsearch\lib\sbmh.js:248:10)
+    at SBMH.push (C:\Users\hamza\Desktop\co\server\node_modules\streamsearch\lib\sbmh.js:104:16)
+    at Multipart._write (C:\Users\hamza\Desktop\co\server\node_modules\busboy\lib\types\multipart.js:567:19)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+Time: 2026-05-14T03:59:23.676Z
+
