@@ -13,6 +13,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const ratingRoutes = require('./routes/ratingRoutes');
 const generalRoutes = require('./routes/generalRoutes');
 const marketingRoutes = require('./routes/marketingRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/marketing', marketingRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/api', generalRoutes);
 
 // Run Migrations

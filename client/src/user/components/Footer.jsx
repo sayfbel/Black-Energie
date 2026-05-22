@@ -143,7 +143,9 @@ const Footer = () => {
                     <div className="bottom-content">
                         <p className="copyright">&copy; 2026 BLACK ENERGIE. {t('footer.legal').toUpperCase()}.</p>
                         <div className="developer-branding">
-                            <img src={devSigne} alt="Developer Signature" className="dev-signature" />
+                            <Link to="/magazine#digital-architect">
+                                <img src={devSigne} alt="Developer Signature" className="dev-signature" />
+                            </Link>
                             <div className="dev-links">
                                 <a href="https://github.com/sayfbel" target="_blank" rel="noopener noreferrer"><Github size={16} /></a>
                                 <a href="https://www.linkedin.com/in/saif-bel-90b044241/" target="_blank" rel="noopener noreferrer"><Linkedin size={16} /></a>

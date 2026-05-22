@@ -308,12 +308,14 @@
   width: auto;
   opacity: 0.6;
   filter: grayscale(1);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
 }
 
 .developer-branding:hover .dev-signature {
   opacity: 1;
   filter: grayscale(0);
+  transform: scale(1.06);
 }
 
 .dev-links {

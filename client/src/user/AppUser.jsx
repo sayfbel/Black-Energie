@@ -22,6 +22,7 @@ import NotFound from './pages/NotFound';
 
 import { CartProvider } from './context/CartContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { Chatbot } from './components/Chatbot';
 
 const AppUser = () => {
     const [offers, setOffers] = useState([]);
@@ -39,9 +40,22 @@ const AppUser = () => {
                 
                 const now = new Date();
                 const activeOffers = offersRes.data.filter(offer => {
-                    const start = offer.start_date ? new Date(offer.start_date) : null;
-                    const end = offer.end_date ? new Date(offer.end_date) : null;
-                    return (!start || start <= now) && (!end || end >= now);
+                    const parseDate = (dStr, isEnd = false) => {
+                        if (!dStr || dStr.startsWith('0000-00-00') || dStr === '') return null;
+                        const d = new Date(dStr);
+                        if (isNaN(d.getTime())) return null;
+                        // If it's the end date and formatted as YYYY-MM-DD, make it active until the very end of that day
+                        if (isEnd && dStr.includes('-') && !dStr.includes('T') && !dStr.includes(':')) {
+                            d.setHours(23, 59, 59, 999);
+                        }
+                        return d;
+                    };
+                    
+                    const start = parseDate(offer.start_date, false);
+                    const end = parseDate(offer.end_date, true);
+                    const isActive = offer.is_active !== 0 && offer.is_active !== false;
+
+                    return isActive && (!start || start <= now) && (!end || end >= now);
                 });
 
                 setOffers(activeOffers);
@@ -82,6 +96,7 @@ const AppUser = () => {
                 <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />
+            <Chatbot />
             </CartProvider>
         </LanguageProvider>
     );

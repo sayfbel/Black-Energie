@@ -28,11 +28,31 @@ const Orders = () => {
         fetchOrders();
     }, []);
 
+    const getStatusDotColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'confirmed':
+            case 'delivered':
+                return 'var(--admin-success)';
+            case 'rejected':
+            case 'refused':
+                return 'var(--admin-danger)';
+            case 'picked up':
+                return '#3498db';
+            case 'in transit':
+                return '#f39c12';
+            case 'returned':
+                return '#9b59b6';
+            case 'pending':
+            default:
+                return 'var(--admin-primary)';
+        }
+    };
+
     const handleStatusUpdate = async (id, status) => {
         try {
             await axios.patch(`/api/orders/${id}/status`, { status });
             showNotification(`Acquisition #${id} marked as ${status}`, 'success');
-            setSelectedOrder(null);
+            setSelectedOrder(prev => prev && prev.id === id ? { ...prev, status } : prev);
             fetchOrders(); // Refresh the list
         } catch (error) {
             console.error("Error updating status:", error);
@@ -348,65 +368,113 @@ const Orders = () => {
                                         borderRadius: '4px'
                                     }}>
                                         <h4 style={{ fontSize: '0.65rem', color: 'var(--admin-primary)', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '2px', fontWeight: '700' }}>Logistics Status</h4>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-                                            <div style={{ 
-                                                width: '8px', 
-                                                height: '8px', 
-                                                borderRadius: '50%', 
-                                                background: selectedOrder.status === 'confirmed' ? 'var(--admin-success)' : selectedOrder.status === 'rejected' ? 'var(--admin-danger)' : 'var(--admin-primary)', 
-                                                boxShadow: `0 0 10px ${selectedOrder.status === 'confirmed' ? 'var(--admin-success)' : selectedOrder.status === 'rejected' ? 'var(--admin-danger)' : 'var(--admin-primary)'}` 
-                                            }}></div>
-                                            <span style={{ textTransform: 'uppercase', fontSize: '0.85rem', letterSpacing: '1px', fontWeight: '600', color: 'var(--admin-text-main)' }}>{selectedOrder.status}</span>
-                                        </div>
                                         
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <button 
-                                                onClick={() => handleStatusUpdate(selectedOrder.id, 'confirmed')}
-                                                className="fashion-button-chic" 
-                                                style={{ 
-                                                    width: '100%', 
-                                                    padding: '1rem',
-                                                    background: 'var(--admin-primary)',
-                                                    border: '1px solid var(--admin-primary)',
-                                                    color: 'black',
-                                                    textTransform: 'uppercase',
-                                                    fontSize: '0.7rem',
-                                                    letterSpacing: '2px',
-                                                    fontWeight: '700',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.3s',
+                                        {(() => {
+                                            const STATUS_OPTIONS = ['Pending', 'Picked Up', 'In Transit', 'Delivered', 'Refused', 'Returned'];
+                                            const currentStatus = selectedOrder.status || 'Pending';
+                                            const currentIndex = STATUS_OPTIONS.findIndex(
+                                                opt => opt.toLowerCase() === currentStatus.toLowerCase()
+                                            );
+                                            const validIdx = currentIndex !== -1 ? currentIndex : 0;
+                                            const len = STATUS_OPTIONS.length;
+
+                                            const idx_prev = (validIdx - 1 + len) % len;
+                                            const idx_active = validIdx;
+                                            const idx_next = (validIdx + 1) % len;
+
+                                            const prevOption = STATUS_OPTIONS[idx_prev];
+                                            const activeOption = STATUS_OPTIONS[idx_active];
+                                            const nextOption = STATUS_OPTIONS[idx_next];
+
+                                            return (
+                                                <div style={{
                                                     display: 'flex',
+                                                    flexDirection: 'column',
                                                     alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: '0.5rem'
-                                                }}
-                                            >
-                                                <Check size={16} /> Confirm Acquisition
-                                            </button>
-                                            
-                                            <button 
-                                                onClick={() => handleStatusUpdate(selectedOrder.id, 'rejected')}
-                                                style={{ 
-                                                    width: '100%', 
-                                                    padding: '1rem',
-                                                    background: 'none',
-                                                    border: '1px solid var(--admin-danger)',
-                                                    color: 'var(--admin-danger)',
-                                                    textTransform: 'uppercase',
-                                                    fontSize: '0.7rem',
-                                                    letterSpacing: '2px',
-                                                    fontWeight: '700',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.3s',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    gap: '0.5rem'
-                                                }}
-                                            >
-                                                <Trash2 size={16} /> Reject Acquisition
-                                            </button>
-                                        </div>
+                                                    gap: '0.75rem',
+                                                    width: '100%',
+                                                    padding: '0.5rem 0',
+                                                    position: 'relative'
+                                                }}>
+                                                    {/* Upper Option */}
+                                                    <div 
+                                                        onClick={() => handleStatusUpdate(selectedOrder.id, prevOption)}
+                                                        style={{
+                                                            fontSize: '0.8rem',
+                                                            color: 'var(--admin-text-muted)',
+                                                            opacity: 0.45,
+                                                            transform: 'scale(0.85)',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '1px',
+                                                            userSelect: 'none',
+                                                            textAlign: 'center',
+                                                            padding: '4px 8px',
+                                                            width: '100%'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.opacity = '0.8';
+                                                            e.currentTarget.style.transform = 'scale(0.9)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.opacity = '0.45';
+                                                            e.currentTarget.style.transform = 'scale(0.85)';
+                                                        }}
+                                                    >
+                                                        {prevOption}
+                                                    </div>
+
+                                                    {/* Middle Option */}
+                                                    <div style={{
+                                                        width: '100%',
+                                                        background: 'var(--admin-primary)',
+                                                        color: '#000000',
+                                                        padding: '0.75rem 1rem',
+                                                        fontSize: '0.85rem',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '1.5px',
+                                                        fontWeight: '700',
+                                                        textAlign: 'center',
+                                                        borderRadius: '4px',
+                                                        boxShadow: '0 4px 15px rgba(201, 160, 80, 0.3)',
+                                                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                                        userSelect: 'none'
+                                                    }}>
+                                                        {activeOption}
+                                                    </div>
+
+                                                    {/* Lower Option */}
+                                                    <div 
+                                                        onClick={() => handleStatusUpdate(selectedOrder.id, nextOption)}
+                                                        style={{
+                                                            fontSize: '0.8rem',
+                                                            color: 'var(--admin-text-muted)',
+                                                            opacity: 0.45,
+                                                            transform: 'scale(0.85)',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                                                            textTransform: 'uppercase',
+                                                            letterSpacing: '1px',
+                                                            userSelect: 'none',
+                                                            textAlign: 'center',
+                                                            padding: '4px 8px',
+                                                            width: '100%'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.opacity = '0.8';
+                                                            e.currentTarget.style.transform = 'scale(0.9)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.opacity = '0.45';
+                                                            e.currentTarget.style.transform = 'scale(0.85)';
+                                                        }}
+                                                    >
+                                                        {nextOption}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </div>

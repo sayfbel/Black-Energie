@@ -10,7 +10,7 @@
 
 /* --- Editorial Sidebar --- */
 .sidebar {
-    width: 300px;
+    width: 200px;
     border-right: 1px solid var(--admin-border);
     display: flex;
     flex-direction: column;

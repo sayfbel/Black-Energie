@@ -5,6 +5,7 @@ import { useNotification } from '../../user/context/NotificationContext';
 import ConfirmModal from '../components/ConfirmModal';
 import CoutureOptionsBar from '../components/CoutureOptionsBar';
 import CoutureSelect from '../components/CoutureSelect';
+import CoutureDatePicker from '../components/CoutureDatePicker';
 import { LayoutDashboard, Globe, MousePointer2 } from 'lucide-react';
 
 const Offers = () => {
@@ -295,24 +296,16 @@ const Offers = () => {
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div className="chic-input-group">
-                                        <label style={{ fontSize: '0.6rem', color: 'var(--admin-text-muted)', display: 'block', marginBottom: '0.3rem' }}>Start Date</label>
-                                        <input 
-                                            type="date" 
-                                            className="chic-input"
-                                            value={offerForm.start_date}
-                                            onChange={(e) => setOfferForm({...offerForm, start_date: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="chic-input-group">
-                                        <label style={{ fontSize: '0.6rem', color: 'var(--admin-text-muted)', display: 'block', marginBottom: '0.3rem' }}>End Date</label>
-                                        <input 
-                                            type="date" 
-                                            className="chic-input"
-                                            value={offerForm.end_date}
-                                            onChange={(e) => setOfferForm({...offerForm, end_date: e.target.value})}
-                                        />
-                                    </div>
+                                    <CoutureDatePicker 
+                                        label="Start Date"
+                                        value={offerForm.start_date}
+                                        onChange={(val) => setOfferForm({...offerForm, start_date: val})}
+                                    />
+                                    <CoutureDatePicker 
+                                        label="End Date"
+                                        value={offerForm.end_date}
+                                        onChange={(val) => setOfferForm({...offerForm, end_date: val})}
+                                    />
                                 </div>
 
                                 <button type="submit" className="btn-couture" disabled={submitLoading}>
@@ -403,24 +396,16 @@ const Offers = () => {
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div className="chic-input-group">
-                                        <label style={{ fontSize: '0.6rem', color: 'var(--admin-text-muted)', display: 'block', marginBottom: '0.3rem' }}>Start Date</label>
-                                        <input 
-                                            type="date" 
-                                            className="chic-input"
-                                            value={couponForm.start_date}
-                                            onChange={(e) => setCouponForm({...couponForm, start_date: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="chic-input-group">
-                                        <label style={{ fontSize: '0.6rem', color: 'var(--admin-text-muted)', display: 'block', marginBottom: '0.3rem' }}>End Date</label>
-                                        <input 
-                                            type="date" 
-                                            className="chic-input"
-                                            value={couponForm.end_date}
-                                            onChange={(e) => setCouponForm({...couponForm, end_date: e.target.value})}
-                                        />
-                                    </div>
+                                    <CoutureDatePicker 
+                                        label="Start Date"
+                                        value={couponForm.start_date}
+                                        onChange={(val) => setCouponForm({...couponForm, start_date: val})}
+                                    />
+                                    <CoutureDatePicker 
+                                        label="End Date"
+                                        value={couponForm.end_date}
+                                        onChange={(val) => setCouponForm({...couponForm, end_date: val})}
+                                    />
                                 </div>
 
                                 <button type="submit" className="btn-couture" disabled={submitLoading}>

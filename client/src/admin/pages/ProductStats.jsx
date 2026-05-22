@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle, AlertCircle, Truck, XCircle, RotateCcw } from 'lucide-react';
 
 const ProductStats = () => {
     const { productName } = useParams();
@@ -37,16 +37,35 @@ const ProductStats = () => {
     // Process stats
     let totalRevenue = 0;
     let totalOrders = 0;
-    let pending = 0;
-    let valid = 0;
-    let invalid = 0;
+    
+    // Initialize count for each of the 6 logistics statuses
+    const statsMap = {
+        'pending': 0,
+        'picked up': 0,
+        'in transit': 0,
+        'delivered': 0,
+        'refused': 0,
+        'returned': 0
+    };
 
     (statusStats || []).forEach(stat => {
         totalOrders += stat.count;
         totalRevenue += Number(stat.total_revenue || 0);
-        if (stat.status === 'pending') pending += stat.count;
-        if (stat.status === 'confirmed') valid += stat.count;
-        if (stat.status === 'cancelled') invalid += stat.count;
+        
+        const lowerStatus = stat.status?.toLowerCase();
+        if (lowerStatus in statsMap) {
+            statsMap[lowerStatus] += stat.count;
+        } else {
+            // Handle any legacy values
+            if (lowerStatus === 'confirmed') {
+                statsMap['delivered'] += stat.count;
+            } else if (lowerStatus === 'cancelled' || lowerStatus === 'rejected') {
+                statsMap['refused'] += stat.count;
+            } else {
+                // Default fallback
+                statsMap['pending'] += stat.count;
+            }
+        }
     });
 
     return (
@@ -93,25 +112,60 @@ const ProductStats = () => {
             </div>
 
             <div style={{ background: 'var(--admin-bg-dark)', border: '1px solid var(--admin-border)', padding: '3rem', borderRadius: '4px' }}>
-                <h3 style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', marginBottom: '2rem', fontWeight: '400', borderBottom: '1px solid var(--admin-border)', paddingBottom: '1rem' }}>Order Status Distribution</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem' }}>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', marginBottom: '2rem', fontWeight: '400', borderBottom: '1px solid var(--admin-border)', paddingBottom: '1rem' }}>Order Logistics Distribution</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '2rem' }}>
+                    {/* Pending */}
                     <div style={{ borderLeft: '2px solid var(--admin-primary)', paddingLeft: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
-                            <Clock size={16} /> <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Pending</span>
+                            <Clock size={16} color="var(--admin-primary)" /> 
+                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Pending</span>
                         </div>
-                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)' }}>{pending}</div>
+                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['pending']}</div>
                     </div>
+
+                    {/* Picked Up */}
+                    <div style={{ borderLeft: '2px solid #3498db', paddingLeft: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
+                            <Package size={16} color="#3498db" /> 
+                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Picked Up</span>
+                        </div>
+                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['picked up']}</div>
+                    </div>
+
+                    {/* In Transit */}
+                    <div style={{ borderLeft: '2px solid #f39c12', paddingLeft: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
+                            <Truck size={16} color="#f39c12" /> 
+                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>In Transit</span>
+                        </div>
+                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['in transit']}</div>
+                    </div>
+
+                    {/* Delivered */}
                     <div style={{ borderLeft: '2px solid var(--admin-success)', paddingLeft: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
-                            <CheckCircle size={16} color="var(--admin-success)" /> <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Valid</span>
+                            <CheckCircle size={16} color="var(--admin-success)" /> 
+                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Delivered</span>
                         </div>
-                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)' }}>{valid}</div>
+                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['delivered']}</div>
                     </div>
+
+                    {/* Refused */}
                     <div style={{ borderLeft: '2px solid var(--admin-danger)', paddingLeft: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
-                            <AlertCircle size={16} color="var(--admin-danger)" /> <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Non Valid</span>
+                            <XCircle size={16} color="var(--admin-danger)" /> 
+                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Refused</span>
                         </div>
-                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)' }}>{invalid}</div>
+                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['refused']}</div>
+                    </div>
+
+                    {/* Returned */}
+                    <div style={{ borderLeft: '2px solid #9b59b6', paddingLeft: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--admin-text-muted)', marginBottom: '0.5rem' }}>
+                            <RotateCcw size={16} color="#9b59b6" /> 
+                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Returned</span>
+                        </div>
+                        <div style={{ fontSize: '2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['returned']}</div>
                     </div>
                 </div>
             </div>

@@ -40,6 +40,7 @@ const Overview = () => {
     });
     const [loading, setLoading] = useState(true);
     const [timeRange, setTimeRange] = useState('weekly');
+    const [hoveredIndex, setHoveredIndex] = useState(null);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -134,7 +135,10 @@ const Overview = () => {
                             {['weekly', 'monthly'].map(range => (
                                 <button 
                                     key={range}
-                                    onClick={() => setTimeRange(range)}
+                                    onClick={() => {
+                                        setTimeRange(range);
+                                        setHoveredIndex(null);
+                                    }}
                                     style={{
                                         background: timeRange === range ? 'var(--admin-primary)' : 'transparent',
                                         color: timeRange === range ? '#000' : 'var(--admin-text-muted)',
@@ -155,134 +159,268 @@ const Overview = () => {
                         </div>
                     </div>
 
-                    <div style={{ height: '220px', width: '100%', marginBottom: '2rem', position: 'relative' }}>
-                        <svg width="100%" height="100%" viewBox="0 0 1000 220" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
-                            <defs>
-                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="var(--admin-primary)" stopOpacity="0.3" />
-                                    <stop offset="100%" stopColor="var(--admin-primary)" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            
-                            {/* Area Fill */}
-                            {(data.charts[timeRange] || []).length > 0 && (
-                                <motion.path
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 1 }}
-                                    d={`
-                                        M 0,220
-                                        ${(data.charts[timeRange] || []).map((d, i) => {
-                                            const total = (data.charts[timeRange] || []).length;
-                                            const x = total > 1 ? (i / (total - 1)) * 1000 : 500;
-                                            const y = 220 - (d.orders / (maxOrders || 1)) * 180;
-                                            return `L ${x},${y}`;
-                                        }).join(' ')}
-                                        V 220
-                                        Z
-                                    `}
-                                    fill="url(#chartGradient)"
-                                />
-                            )}
+                    {(() => {
+                        const chartData = data.charts[timeRange] || [];
+                        const maxVal = Math.max(...(chartData.map(d => d.orders) || []), 1);
+                        const points = chartData.map((d, i) => {
+                            const x = chartData.length > 1 ? (i / (chartData.length - 1)) * 1000 : 500;
+                            const y = 190 - (d.orders / maxVal) * 140; // beautiful 30px top margin and 30px bottom margin
+                            return { x, y, orders: d.orders, label: timeRange === 'weekly' ? d.day : d.date };
+                        });
 
-                            {/* Main Line */}
-                            {(data.charts[timeRange] || []).length > 0 ? (
-                                <motion.path
-                                    initial={{ pathLength: 0, opacity: 0 }}
-                                    animate={{ pathLength: 1, opacity: 1 }}
-                                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                                    d={(data.charts[timeRange] || []).map((d, i) => {
-                                        const total = (data.charts[timeRange] || []).length;
-                                        const x = total > 1 ? (i / (total - 1)) * 1000 : 500;
-                                        const y = 220 - (d.orders / (maxOrders || 1)) * 180;
-                                        return `${i === 0 ? 'M' : 'L'} ${x},${y}`;
-                                    }).join(' ')}
-                                    fill="none"
-                                    stroke="var(--admin-primary)"
-                                    strokeWidth="3"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    vectorEffect="non-scaling-stroke"
-                                />
-                            ) : (
-                                <path d="M 0,220 L 1000,220" stroke="var(--admin-border)" strokeWidth="1" strokeDasharray="5,5" vectorEffect="non-scaling-stroke" />
-                            )}
+                        const getSplinePath = (pts) => {
+                            if (pts.length === 0) return '';
+                            let path = `M ${pts[0].x},${pts[0].y}`;
+                            for (let i = 1; i < pts.length; i++) {
+                                const p0 = pts[i - 1];
+                                const p1 = pts[i];
+                                const cp1x = p0.x + (p1.x - p0.x) / 3;
+                                const cp1y = p0.y;
+                                const cp2x = p1.x - (p1.x - p0.x) / 3;
+                                const cp2y = p1.y;
+                                path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p1.x},${p1.y}`;
+                            }
+                            return path;
+                        };
 
-                        </svg>
+                        const linePath = getSplinePath(points);
+                        const areaPath = points.length > 0 ? `${linePath} V 220 H ${points[0].x} Z` : '';
 
-                        {/* Data Points Overlay (HTML to prevent SVG distortion) */}
-                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-                            {(data.charts[timeRange] || []).map((d, i) => {
-                                const total = (data.charts[timeRange] || []).length;
-                                const leftPercent = total > 1 ? (i / (total - 1)) * 100 : 50;
-                                const yValue = 220 - (d.orders / (maxOrders || 1)) * 180;
-                                const topPercent = (yValue / 220) * 100;
-                                
-                                return (
-                                    <div key={i} style={{ 
-                                        position: 'absolute', 
-                                        left: `${leftPercent}%`, 
-                                        top: `${topPercent}%`,
-                                        transform: 'translate(-50%, -50%)',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center'
-                                    }}>
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 1 + i * 0.1 }}
-                                            style={{
-                                                position: 'absolute',
-                                                top: '-25px',
-                                                fontSize: '0.7rem',
-                                                color: d.orders === maxOrders ? 'var(--admin-primary)' : 'var(--admin-text-muted)',
-                                                fontWeight: d.orders === maxOrders ? '700' : '400',
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            {d.orders}
-                                        </motion.div>
-                                        <motion.div
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ delay: 0.5 + i * 0.1, type: 'spring' }}
-                                            style={{
-                                                width: '10px',
-                                                height: '10px',
-                                                borderRadius: '50%',
-                                                backgroundColor: 'var(--admin-bg-dark)',
-                                                border: '2px solid var(--admin-primary)'
-                                            }}
+                        const handleMouseMove = (e) => {
+                            if (points.length === 0) return;
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const clientX = e.clientX - rect.left;
+                            const percent = clientX / rect.width;
+                            const index = Math.min(Math.max(Math.round(percent * (points.length - 1)), 0), points.length - 1);
+                            setHoveredIndex(index);
+                        };
+
+                        const handleMouseLeave = () => {
+                            setHoveredIndex(null);
+                        };
+
+                        return (
+                            <div 
+                                onMouseMove={handleMouseMove}
+                                onMouseLeave={handleMouseLeave}
+                                style={{ height: '220px', width: '100%', marginBottom: '2.5rem', position: 'relative', cursor: 'crosshair' }}
+                            >
+                                <svg width="100%" height="100%" viewBox="0 0 1000 220" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+                                    <defs>
+                                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="var(--admin-primary)" stopOpacity="0.25" />
+                                            <stop offset="100%" stopColor="var(--admin-primary)" stopOpacity="0.0" />
+                                        </linearGradient>
+                                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                            <feDropShadow dx="0" dy="6" stdDeviation="4" floodColor="var(--admin-primary)" floodOpacity="0.3"/>
+                                        </filter>
+                                    </defs>
+
+                                    {/* Horizontal Gridlines & Y labels */}
+                                    {points.length > 0 && [0, 0.5, 1].map((ratio, idx) => {
+                                        const yVal = 190 - ratio * 140;
+                                        const labelVal = Math.round(ratio * maxVal);
+                                        return (
+                                            <g key={idx}>
+                                                <line 
+                                                    x1="0" 
+                                                    y1={yVal} 
+                                                    x2="1000" 
+                                                    y2={yVal} 
+                                                    stroke="rgba(255, 255, 255, 0.04)" 
+                                                    strokeWidth="1"
+                                                />
+                                                <text 
+                                                    x="1000" 
+                                                    y={yVal - 6} 
+                                                    fill="var(--admin-text-muted)" 
+                                                    fontSize="9" 
+                                                    fontWeight="500"
+                                                    textAnchor="end"
+                                                    letterSpacing="1"
+                                                    opacity="0.4"
+                                                >
+                                                    {labelVal} {labelVal === 1 ? 'order' : 'orders'}
+                                                </text>
+                                            </g>
+                                        );
+                                    })}
+
+                                    {/* Area Fill */}
+                                    {areaPath && (
+                                        <motion.path
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ duration: 0.8 }}
+                                            d={areaPath}
+                                            fill="url(#chartGradient)"
                                         />
+                                    )}
+
+                                    {/* Main Line with Glow Filter */}
+                                    {linePath ? (
+                                        <motion.path
+                                            initial={{ pathLength: 0, opacity: 0 }}
+                                            animate={{ pathLength: 1, opacity: 1 }}
+                                            transition={{ duration: 1.2, ease: "easeInOut" }}
+                                            d={linePath}
+                                            fill="none"
+                                            stroke="var(--admin-primary)"
+                                            strokeWidth="3.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            vectorEffect="non-scaling-stroke"
+                                            filter="url(#glow)"
+                                        />
+                                    ) : (
+                                        <path d="M 0,220 L 1000,220" stroke="var(--admin-border)" strokeWidth="1" strokeDasharray="5,5" vectorEffect="non-scaling-stroke" />
+                                    )}
+
+                                    {/* Vertical Hover Guide Line */}
+                                    {hoveredIndex !== null && points[hoveredIndex] && (
+                                        <line 
+                                            x1={points[hoveredIndex].x} 
+                                            y1={30} 
+                                            x2={points[hoveredIndex].x} 
+                                            y2={220} 
+                                            stroke="var(--admin-primary)" 
+                                            strokeWidth="1.5" 
+                                            strokeDasharray="4,4" 
+                                            opacity="0.3"
+                                        />
+                                    )}
+
+                                    {/* Elegant Order Position Markers (Circles) */}
+                                    {points.map((pt, idx) => {
+                                        const isHovered = hoveredIndex === idx;
+                                        return (
+                                            <g key={idx} style={{ pointerEvents: 'none' }}>
+                                                {/* Outer golden halo */}
+                                                <circle 
+                                                    cx={pt.x} 
+                                                    cy={pt.y} 
+                                                    r={isHovered ? 12 : 5} 
+                                                    fill="var(--admin-primary)" 
+                                                    opacity={isHovered ? 0.25 : 0.15}
+                                                    style={{ transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                                                />
+                                                {/* Crisp card-colored circle body with primary stroke */}
+                                                <circle 
+                                                    cx={pt.x} 
+                                                    cy={pt.y} 
+                                                    r={isHovered ? 7.5 : 4.5} 
+                                                    fill="var(--admin-bg-card)" 
+                                                    stroke="var(--admin-primary)" 
+                                                    strokeWidth={isHovered ? 2.5 : 1.8}
+                                                    style={{ transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                                                />
+                                                {/* Main text colored core */}
+                                                <circle 
+                                                    cx={pt.x} 
+                                                    cy={pt.y} 
+                                                    r={isHovered ? 3.5 : 2} 
+                                                    fill="var(--admin-text-main)" 
+                                                    style={{ transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                                                />
+                                            </g>
+                                        );
+                                    })}
+                                </svg>
+
+                                {/* Pixel-Perfect X-Axis Labels */}
+                                <div style={{ 
+                                    position: 'absolute', 
+                                    bottom: '-25px', 
+                                    left: 0, 
+                                    right: 0, 
+                                    height: '20px',
+                                    pointerEvents: 'none'
+                                }}>
+                                    {points.length > 0 ? (
+                                        points.map((pt, i) => {
+                                            const showLabel = timeRange === 'weekly' || i % 5 === 0 || i === points.length - 1;
+                                            if (!showLabel) return null;
+                                            
+                                            return (
+                                                <span 
+                                                    key={i} 
+                                                    style={{ 
+                                                        position: 'absolute',
+                                                        left: `${(pt.x / 1000) * 100}%`,
+                                                        transform: i === 0 
+                                                            ? 'none' 
+                                                            : i === points.length - 1 
+                                                                ? 'translateX(-100%)' 
+                                                                : 'translateX(-50%)',
+                                                        fontSize: '0.65rem', 
+                                                        color: 'var(--admin-text-muted)', 
+                                                        textTransform: 'uppercase', 
+                                                        letterSpacing: '1px',
+                                                        whiteSpace: 'nowrap',
+                                                        transition: 'left 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)'
+                                                    }}
+                                                >
+                                                    {pt.label}
+                                                </span>
+                                            );
+                                        })
+                                    ) : (
+                                        <span style={{ position: 'absolute', width: '100%', textAlign: 'center', fontSize: '0.65rem', color: 'var(--admin-text-muted)', fontStyle: 'italic' }}>
+                                            Awaiting initial order data to map trajectory.
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Floating Tooltip Card */}
+                                {hoveredIndex !== null && points[hoveredIndex] && (
+                                    <div 
+                                        style={{
+                                            position: 'absolute',
+                                            left: `${(points[hoveredIndex].x / 1000) * 100}%`,
+                                            top: `${(points[hoveredIndex].y / 220) * 100 - 15}%`,
+                                            transform: hoveredIndex > points.length - 3 
+                                                ? 'translate(-108%, -100%)' 
+                                                : hoveredIndex < 2 
+                                                    ? 'translate(8%, -100%)' 
+                                                    : 'translate(-50%, -100%)',
+                                            zIndex: 100,
+                                            pointerEvents: 'none',
+                                            transition: 'left 0.15s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.15s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                        }}
+                                    >
+                                        <div className="chart-tooltip">
+                                            <div style={{ 
+                                                fontSize: '0.6rem', 
+                                                color: 'var(--admin-text-muted)', 
+                                                textTransform: 'uppercase', 
+                                                letterSpacing: '1.5px',
+                                                marginBottom: '6px',
+                                                fontWeight: '600'
+                                            }}>
+                                                {points[hoveredIndex].label}
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ 
+                                                    width: '6px', 
+                                                    height: '6px', 
+                                                    borderRadius: '50%', 
+                                                    background: 'var(--admin-primary)', 
+                                                    boxShadow: '0 0 8px var(--admin-primary)' 
+                                                }} />
+                                                <div style={{ fontSize: '1.1rem', fontWeight: '700', fontFamily: 'var(--font-heading)' }}>
+                                                    {points[hoveredIndex].orders} <span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--admin-text-muted)' }}>{points[hoveredIndex].orders === 1 ? 'Order' : 'Orders'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="chart-tooltip-divider">
+                                                <Zap size={10} />
+                                                <span>Est. Volatility Stable</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                        
-                        {/* X-Axis Labels */}
-                        <div style={{ 
-                            position: 'absolute', 
-                            bottom: '-25px', 
-                            left: 0, 
-                            right: 0, 
-                            display: 'flex', 
-                            justifyContent: 'space-between',
-                            padding: '0 5px'
-                        }}>
-                            {(data.charts[timeRange] || []).length > 0 ? (
-                                (data.charts[timeRange] || []).map((d, i) => (
-                                    <span key={i} style={{ fontSize: '0.65rem', color: 'var(--admin-text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                        {timeRange === 'weekly' ? d.day : d.date}
-                                    </span>
-                                ))
-                            ) : (
-                                <span style={{ width: '100%', textAlign: 'center', fontSize: '0.65rem', color: 'var(--admin-text-muted)', fontStyle: 'italic' }}>
-                                    Awaiting initial order data to map trajectory.
-                                </span>
-                            )}
-                        </div>
-                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Star Spotlight */}
@@ -507,6 +645,36 @@ const Overview = () => {
                     visibility: visible;
                     opacity: 1;
                     transform: translateY(0);
+                }
+                .chart-tooltip {
+                    background: rgba(10, 10, 10, 0.95);
+                    border: 1px solid var(--admin-primary);
+                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85), inset 0 0 10px rgba(212, 175, 55, 0.05);
+                    border-radius: 4px;
+                    padding: 1rem 1.2rem;
+                    color: var(--admin-text-main);
+                    font-family: var(--font-body, sans-serif);
+                    min-width: 150px;
+                    backdrop-filter: blur(10px);
+                    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+                }
+                body.light-mode .chart-tooltip {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 1px solid var(--admin-primary);
+                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(212, 175, 55, 0.02);
+                }
+                .chart-tooltip-divider {
+                    border-top: 1px solid rgba(255, 255, 255, 0.08);
+                    margin-top: 8px;
+                    padding-top: 8px;
+                    font-size: 0.65rem;
+                    color: var(--admin-success);
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                body.light-mode .chart-tooltip-divider {
+                    border-top: 1px solid rgba(0, 0, 0, 0.08);
                 }
             `}} />
         </div>

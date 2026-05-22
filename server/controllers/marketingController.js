@@ -6,9 +6,12 @@ exports.createOffer = async (req, res) => {
     try {
         const { name, type, discount_type, discount_value, target_ids, start_date, end_date } = req.body;
         
+        const formattedStartDate = start_date && start_date.trim() !== '' ? start_date : null;
+        const formattedEndDate = end_date && end_date.trim() !== '' ? end_date : null;
+
         const [result] = await pool.query(
             'INSERT INTO offers (name, type, discount_type, discount_value, target_ids, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [name, type, discount_type, discount_value, JSON.stringify(target_ids), start_date, end_date]
+            [name, type, discount_type, discount_value, JSON.stringify(target_ids), formattedStartDate, formattedEndDate]
         );
         
         res.status(201).json({ message: 'Offer created successfully', id: result.insertId });
@@ -52,9 +55,12 @@ exports.createCoupon = async (req, res) => {
     try {
         const { code, discount_type, discount_value, min_order_amount, start_date, end_date } = req.body;
         
+        const formattedStartDate = start_date && start_date.trim() !== '' ? start_date : null;
+        const formattedEndDate = end_date && end_date.trim() !== '' ? end_date : null;
+
         const [result] = await pool.query(
             'INSERT INTO coupons (code, discount_type, discount_value, min_order_amount, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)',
-            [code, discount_type, discount_value, min_order_amount, start_date, end_date]
+            [code, discount_type, discount_value, min_order_amount, formattedStartDate, formattedEndDate]
         );
         
         res.status(201).json({ message: 'Coupon created successfully', id: result.insertId });

@@ -57,10 +57,13 @@ const Magazine = () => {
     const { hash } = useLocation();
 
     useEffect(() => {
-        if (hash === '#faq') {
-            const element = document.getElementById('faq');
+        if (hash) {
+            const id = hash.replace('#', '');
+            const element = document.getElementById(id);
             if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
             }
         }
     }, [hash]);
@@ -136,7 +139,7 @@ const Magazine = () => {
                     </div>
                 </section>
 
-                <section style={{ marginBottom: '8rem', padding: '6rem', background: 'rgba(0,0,0,0.02)', borderRadius: '24px', border: '1px solid rgba(0,0,0,0.05)', textAlign: 'center' }} className="collaboration-section">
+                <section id="digital-architect" style={{ marginBottom: '8rem', padding: '6rem', background: 'rgba(0,0,0,0.02)', borderRadius: '24px', border: '1px solid rgba(0,0,0,0.05)', textAlign: 'center' }} className="collaboration-section">
                     <span style={{ color: 'var(--primary)', letterSpacing: '4px', textTransform: 'uppercase', fontSize: '0.75rem', marginBottom: '1.5rem', display: 'block' }}>{t('magazine.exclusivePartnership')}</span>
                     <h3 className="luxury-font" style={{ fontSize: '2.5rem', marginBottom: '3rem', color: '#000' }}>{t('magazine.digitalArchitect')}</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>

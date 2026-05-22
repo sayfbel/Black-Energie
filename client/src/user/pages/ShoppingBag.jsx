@@ -151,7 +151,7 @@ const ShoppingBagPage = () => {
             <div className="shopping-bag-page" style={{ background: '#fff', minHeight: '100vh' }}>
                 <style>{`
                     .navbar { background: #000 !important; }
-                    .nav-link, .brand-name, .nav-icon-btn { color: #fff !important; }
+                    .navbar .nav-link, .navbar .brand-name, .navbar .nav-icon-btn { color: #fff !important; }
                     .navbar.scrolled { background: #000 !important; }
                 `}</style>
                 <div className="navbar-spacer" style={{ height: '100px' }}></div>

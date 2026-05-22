@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, User, Clock, CheckCircle, AlertCircle, ShoppingBag, Package, Truck, XCircle, RotateCcw } from 'lucide-react';
 
 const CustomerStats = () => {
     const { customerName } = useParams();
@@ -34,19 +34,58 @@ const CustomerStats = () => {
 
     const { statusStats, biggestOrder, orderHistory } = data;
     
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'confirmed':
+            case 'delivered':
+                return 'var(--admin-success)';
+            case 'rejected':
+            case 'refused':
+                return 'var(--admin-danger)';
+            case 'picked up':
+                return '#3498db';
+            case 'in transit':
+                return '#f39c12';
+            case 'returned':
+                return '#9b59b6';
+            case 'pending':
+            default:
+                return 'var(--admin-primary)';
+        }
+    };
+
     // Process stats
     let totalSpent = 0;
     let totalOrders = 0;
-    let pending = 0;
-    let valid = 0;
-    let invalid = 0;
+    
+    // Initialize count for each of the 6 logistics statuses
+    const statsMap = {
+        'pending': 0,
+        'picked up': 0,
+        'in transit': 0,
+        'delivered': 0,
+        'refused': 0,
+        'returned': 0
+    };
 
     (statusStats || []).forEach(stat => {
         totalOrders += stat.count;
         totalSpent += Number(stat.total_spent || 0);
-        if (stat.status === 'pending') pending += stat.count;
-        if (stat.status === 'confirmed') valid += stat.count;
-        if (stat.status === 'cancelled') invalid += stat.count;
+        
+        const lowerStatus = stat.status?.toLowerCase();
+        if (lowerStatus in statsMap) {
+            statsMap[lowerStatus] += stat.count;
+        } else {
+            // Handle legacy values
+            if (lowerStatus === 'confirmed') {
+                statsMap['delivered'] += stat.count;
+            } else if (lowerStatus === 'cancelled' || lowerStatus === 'rejected') {
+                statsMap['refused'] += stat.count;
+            } else {
+                // Default fallback
+                statsMap['pending'] += stat.count;
+            }
+        }
     });
 
     return (
@@ -93,26 +132,63 @@ const CustomerStats = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
                 <div style={{ background: 'var(--admin-bg-dark)', border: '1px solid var(--admin-border)', padding: '3rem', borderRadius: '4px' }}>
-                    <h3 style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', marginBottom: '2rem', fontWeight: '400', borderBottom: '1px solid var(--admin-border)', paddingBottom: '1rem' }}>Order Status</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--admin-text-muted)' }}>
-                                <Clock size={18} /> <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Pending</span>
+                    <h3 style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', marginBottom: '2rem', fontWeight: '400', borderBottom: '1px solid var(--admin-border)', paddingBottom: '1rem' }}>Order Logistics Status</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        
+                        {/* Pending */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--admin-primary)' }}>
+                                <Clock size={18} color="var(--admin-primary)" /> 
+                                <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Pending</span>
                             </div>
-                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)' }}>{pending}</div>
+                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['pending']}</div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '1rem' }}>
+
+                        {/* Picked Up */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#3498db' }}>
+                                <Package size={18} color="#3498db" /> 
+                                <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Picked Up</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['picked up']}</div>
+                        </div>
+
+                        {/* In Transit */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#f39c12' }}>
+                                <Truck size={18} color="#f39c12" /> 
+                                <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>In Transit</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['in transit']}</div>
+                        </div>
+
+                        {/* Delivered */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.75rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--admin-success)' }}>
-                                <CheckCircle size={18} /> <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Valid</span>
+                                <CheckCircle size={18} color="var(--admin-success)" /> 
+                                <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Delivered</span>
                             </div>
-                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)' }}>{valid}</div>
+                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['delivered']}</div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                        {/* Refused */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.75rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--admin-danger)' }}>
-                                <AlertCircle size={18} /> <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Non Valid</span>
+                                <XCircle size={18} color="var(--admin-danger)" /> 
+                                <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Refused</span>
                             </div>
-                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)' }}>{invalid}</div>
+                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['refused']}</div>
                         </div>
+
+                        {/* Returned */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#9b59b6' }}>
+                                <RotateCcw size={18} color="#9b59b6" /> 
+                                <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>Returned</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', color: 'var(--admin-text-main)', fontWeight: '600' }}>{statsMap['returned']}</div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -134,7 +210,7 @@ const CustomerStats = () => {
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{ color: 'var(--admin-primary)', fontWeight: '600' }}>${Number(order.total_price).toLocaleString()}</div>
-                                    <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: order.status === 'confirmed' ? 'var(--admin-success)' : order.status === 'cancelled' ? 'var(--admin-danger)' : 'var(--admin-text-muted)' }}>{order.status}</div>
+                                    <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: getStatusColor(order.status) }}>{order.status}</div>
                                 </div>
                             </div>
                         ))}

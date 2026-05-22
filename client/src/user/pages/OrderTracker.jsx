@@ -143,7 +143,7 @@ const OrderTracker = () => {
         <div className="order-tracker-page" style={{ background: '#000', minHeight: '100vh', color: '#fff', paddingTop: '160px', paddingBottom: '100px' }}>
             <style>{`
                 .navbar { background: #000 !important; }
-                .nav-link, .brand-name, .nav-icon-btn { color: #fff !important; }
+                .navbar .nav-link, .navbar .brand-name, .navbar .nav-icon-btn { color: #fff !important; }
                 .navbar.scrolled { background: #000 !important; }
                 .navbar.scrolled .nav-link, 
                 .navbar.scrolled .brand-name, 
