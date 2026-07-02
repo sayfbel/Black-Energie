@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Layers } from 'lucide-react';
 import heroVideo from './../../assets/VID-20260428-WA0148.mp4';
 
 import { useLanguage } from '../context/LanguageContext';
@@ -84,9 +85,19 @@ const Packs = () => {
                         <p className="luxury-font" style={{ fontSize: '1.5rem' }}>{t('shop.loading')}</p>
                     </div>
                 ) : packs.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
-                        <p>{language === 'ar' ? 'لا توجد باقات متاحة حالياً.' : language === 'fr' ? 'Aucun pack disponible pour le moment.' : 'No packs available at the moment.'}</p>
-                        <Link to="/shop" className="btn-primary" style={{ display: 'inline-block', marginTop: '2rem', textDecoration: 'none' }}>{t('product.backToProduct')}</Link>
+                    <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center' }}>
+                            <Layers size={80} strokeWidth={0.5} style={{ marginBottom: '2rem', color: '#ccc' }} />
+                            <h1 className="luxury-font" style={{ fontSize: '3rem', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
+                                {language === 'ar' ? 'لا توجد باقات' : language === 'fr' ? 'Aucun pack disponible' : 'No Packs Available'}
+                            </h1>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', maxWidth: '400px', margin: '0 auto 3rem', lineHeight: '1.6' }}>
+                                {language === 'ar' ? 'لا توجد باقات متاحة حالياً في متجرنا. يرجى زيارة المتجر لاستكشاف منتجاتنا الفردية.' : language === 'fr' ? "Aucun pack n'est disponible pour le moment. Veuillez visiter la boutique pour découvrir nos produits individuels." : 'No packs are currently available in our collections. Please visit the shop to explore our single origin reserves.'}
+                            </p>
+                            <Link to="/shop" style={{ padding: '1.2rem 3rem', textDecoration: 'none', background: 'var(--text-main)', color: 'var(--bg-dark)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700', display: 'inline-block', border: '1px solid var(--text-main)' }}>
+                                {language === 'ar' ? 'استكشف المتجر' : language === 'fr' ? 'Explorer la Boutique' : 'Explore Shop'}
+                            </Link>
+                        </motion.div>
                     </div>
                 ) : (
                     <div className="packs-container">

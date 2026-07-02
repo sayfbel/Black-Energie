@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Coffee } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import './../css/home.css';
 
 import heroVideo from './../../assets/VID-20260428-WA0148.mp4';
 
 const Shop = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [products, setProducts] = useState([]);
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -89,6 +90,21 @@ const Shop = () => {
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
                         <p className="luxury-font" style={{ fontSize: '1.5rem' }}>{t('shop.loading')}</p>
+                    </div>
+                ) : products.length === 0 ? (
+                    <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center' }}>
+                            <Coffee size={80} strokeWidth={0.5} style={{ marginBottom: '2rem', color: '#ccc' }} />
+                            <h1 className="luxury-font" style={{ fontSize: '3rem', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
+                                {language === 'ar' ? 'التشكيلة فارغة' : language === 'fr' ? 'La collection est vide' : 'The Collection is Empty'}
+                            </h1>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', maxWidth: '400px', margin: '0 auto 3rem', lineHeight: '1.6' }}>
+                                {language === 'ar' ? 'لا توجد منتجات متاحة حالياً في متجرنا. يرجى العودة لاحقاً أو التحقق من الأقسام الأخرى.' : language === 'fr' ? "Aucun produit n'est disponible pour le moment. Veuillez revenir plus tard ou explorer d'autres sections." : 'No products are currently available in our shop. Please check back later or explore other sections.'}
+                            </p>
+                            <Link to="/" style={{ padding: '1.2rem 3rem', textDecoration: 'none', background: 'var(--text-main)', color: 'var(--bg-dark)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700', display: 'inline-block', border: '1px solid var(--text-main)' }}>
+                                {language === 'ar' ? 'العودة للرئيسية' : language === 'fr' ? 'Retour à la Maison' : 'Return to Maison'}
+                            </Link>
+                        </motion.div>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '3rem', paddingBottom: '8rem' }}>

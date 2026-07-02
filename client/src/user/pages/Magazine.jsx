@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { Instagram, Facebook, Twitter, ExternalLink, Globe, Users, CheckCircle, Coffee, Truck, ChevronDown, Github, Linkedin } from 'lucide-react';
+import { Instagram, Facebook, Twitter, ExternalLink, Globe, Users, CheckCircle, Coffee, Truck, ChevronDown, Github, Linkedin, BookOpen } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import devSigne from './../../assets/DEVELOPER_SIGNE.png';
 import heroVideo from './../../assets/VID-20260428-WA0148.mp4';
@@ -103,26 +103,40 @@ const Magazine = () => {
                     </div>
                 </div>
 
-                <div className="social-stack-carousel" style={{ marginTop: '4rem', width: '100%', height: '600px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', perspective: '1500px', overflow: 'hidden' }}>
-                    {cards.map((card, idx) => {
-                        const distance = idx - activeIndex;
-                        const isCenter = distance === 0;
-                        const absDistance = Math.abs(distance);
-                        if (absDistance > 3) return null;
-                        return (
-                            <motion.div key={idx} className="social-card" onClick={() => { if (isCenter) setSelectedPost(card); else setActiveIndex(idx); }} animate={{ x: distance * 220, z: -absDistance * 150, rotateY: distance * -25, scale: 1 - absDistance * 0.15, opacity: 1 - absDistance * 0.3, zIndex: 100 - absDistance }} transition={{ type: "spring", stiffness: 150, damping: 20 }} whileHover={isCenter ? { scale: 1.05 } : {}} style={{ position: 'absolute', minWidth: '350px', height: '450px', background: 'rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', boxShadow: isCenter ? '0 30px 60px rgba(0,0,0,0.6)' : '0 10px 30px rgba(0,0,0,0.3)', userSelect: 'none', transformStyle: 'preserve-3d' }}>
-                                {card.type === 'video' ? <video src={card.src} autoPlay muted loop playsInline style={{ width: '100%', height: '80%', objectFit: 'cover', pointerEvents: 'none' }} /> : <img src={card.src} alt={card.title} style={{ width: '100%', height: '80%', objectFit: 'cover', pointerEvents: 'none' }} />}
-                                <div style={{ padding: '1.5rem', background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.9))', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', pointerEvents: 'none' }}>
-                                    <h4 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '0.3rem', fontWeight: '600' }}>{card.title}</h4>
-                                    <p style={{ color: 'var(--primary)', fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{card.sub}</p>
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                    <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', gap: '0.5rem' }}>
-                        {cards.map((_, i) => <div key={i} onClick={() => setActiveIndex(i)} style={{ width: i === activeIndex ? '24px' : '8px', height: '8px', background: i === activeIndex ? 'var(--primary)' : 'rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer', transition: 'all 0.3s ease' }} />)}
+                {cards.length === 0 ? (
+                    <div style={{ padding: '5rem 0 8rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center' }}>
+                            <BookOpen size={80} strokeWidth={0.5} style={{ marginBottom: '2rem', color: 'rgba(255, 255, 255, 0.3)' }} />
+                            <h1 className="luxury-font" style={{ fontSize: '3rem', marginBottom: '1.5rem', color: '#fff' }}>
+                                {language === 'ar' ? 'المجلة فارغة' : language === 'fr' ? 'Journal Vide' : 'Journal Empty'}
+                            </h1>
+                            <p style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '3rem', maxWidth: '400px', margin: '0 auto 3rem', lineHeight: '1.6' }}>
+                                {language === 'ar' ? 'لا توجد منشورات أو مقالات متاحة حالياً.' : language === 'fr' ? "Aucun article ou publication n'est disponible pour le moment." : 'No articles or posts are currently available.'}
+                            </p>
+                        </motion.div>
                     </div>
-                </div>
+                ) : (
+                    <div className="social-stack-carousel" style={{ marginTop: '4rem', width: '100%', height: '600px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', perspective: '1500px', overflow: 'hidden' }}>
+                        {cards.map((card, idx) => {
+                            const distance = idx - activeIndex;
+                            const isCenter = distance === 0;
+                            const absDistance = Math.abs(distance);
+                            if (absDistance > 3) return null;
+                            return (
+                                <motion.div key={idx} className="social-card" onClick={() => { if (isCenter) setSelectedPost(card); else setActiveIndex(idx); }} animate={{ x: distance * 220, z: -absDistance * 150, rotateY: distance * -25, scale: 1 - absDistance * 0.15, opacity: 1 - absDistance * 0.3, zIndex: 100 - absDistance }} transition={{ type: "spring", stiffness: 150, damping: 20 }} whileHover={isCenter ? { scale: 1.05 } : {}} style={{ position: 'absolute', minWidth: '350px', height: '450px', background: 'rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', boxShadow: isCenter ? '0 30px 60px rgba(0,0,0,0.6)' : '0 10px 30px rgba(0,0,0,0.3)', userSelect: 'none', transformStyle: 'preserve-3d' }}>
+                                    {card.type === 'video' ? <video src={card.src} autoPlay muted loop playsInline style={{ width: '100%', height: '80%', objectFit: 'cover', pointerEvents: 'none' }} /> : <img src={card.src} alt={card.title} style={{ width: '100%', height: '80%', objectFit: 'cover', pointerEvents: 'none' }} />}
+                                    <div style={{ padding: '1.5rem', background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.9))', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', pointerEvents: 'none' }}>
+                                        <h4 style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '0.3rem', fontWeight: '600' }}>{card.title}</h4>
+                                        <p style={{ color: 'var(--primary)', fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{card.sub}</p>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                        <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', gap: '0.5rem' }}>
+                            {cards.map((_, i) => <div key={i} onClick={() => setActiveIndex(i)} style={{ width: i === activeIndex ? '24px' : '8px', height: '8px', background: i === activeIndex ? 'var(--primary)' : 'rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer', transition: 'all 0.3s ease' }} />)}
+                        </div>
+                    </div>
+                )}
             </section>
 
             <div className="container" style={{ padding: '8rem 0' }}>

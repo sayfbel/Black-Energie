@@ -1,16 +1,97 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { MessageSquare, X, Send, Sparkles } from 'lucide-react';
+import { Coffee, X, Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import './chatbot.css';
+
+const quickOptions = [
+  {
+    id: 'shop',
+    labels: { en: "Explore Shop", fr: "Explorer la Boutique", ar: "استكشاف المتجر" },
+    query: {
+      en: "Tell me about your single origin coffee products in the Shop.",
+      fr: "Parlez-moi des cafés d'origine unique disponibles dans la boutique.",
+      ar: "أخبرني عن منتجات القهوة ذات الأصل الواحد المتاحة في المتجر."
+    }
+  },
+  {
+    id: 'packs',
+    labels: { en: "Coffee Packs", fr: "Packs de Café", ar: "باقات القهوة" },
+    query: {
+      en: "What coffee Packs and collections do you offer?",
+      fr: "Quels packs et collections de café proposez-vous ?",
+      ar: "ما هي باقات ومجموعات القهوة التي تقدمونها؟"
+    }
+  },
+  {
+    id: 'magazine',
+    labels: { en: "Magazine", fr: "Magazine", ar: "المجلة" },
+    query: {
+      en: "Tell me about your Magazine and digital community.",
+      fr: "Parlez-moi de votre magazine et de votre communauté digitale.",
+      ar: "أخبرني عن المجلة والمجتمع الرقمي لبلاك إنيرجي."
+    }
+  },
+  {
+    id: 'faqs',
+    labels: { en: "FAQs & Support", fr: "FAQ & Support", ar: "الأسئلة الشائعة" },
+    query: {
+      en: "What are the most frequently asked questions?",
+      fr: "Quelles sont les questions les plus fréquemment posées ?",
+      ar: "ما هي الأسئلة الشائعة والأكثر تكراراً؟"
+    }
+  }
+];
 
 export const Chatbot = () => {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const handleQuickOption = async (option) => {
+    if (loading) return;
+
+    const displayLabel = option.labels[language] || option.labels.en;
+    const actualQuery = option.query[language] || option.query.en;
+
+    setMessages(prev => [...prev, { sender: 'user', text: displayLabel }]);
+    setLoading(true);
+
+    try {
+      const chatHistory = messages.map(msg => ({
+        role: msg.sender,
+        content: msg.text
+      }));
+
+      const res = await axios.post('/api/chat', {
+        message: actualQuery,
+        history: chatHistory,
+        language: language
+      });
+
+      setMessages(prev => [...prev, { sender: 'assistant', text: res.data.reply }]);
+    } catch (err) {
+      console.error("Chatbot Quick Option Error:", err);
+      const errorMessage = {
+        en: "I apologize, but I am momentarily experiencing difficulty communicating. Please check your connection.",
+        fr: "Je m'excuse, mais je rencontre temporairement des difficultés de communication. Veuillez vérifier votre connexion.",
+        ar: "أعتذر منك، أواجه صعوبة مؤقتة في الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت."
+      };
+      setMessages(prev => [
+        ...prev,
+        {
+          sender: 'assistant',
+          text: errorMessage[language] || errorMessage.en
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Dynamic greetings, placeholders and titles based on language
   const greetings = {
@@ -115,7 +196,7 @@ export const Chatbot = () => {
         whileTap={{ scale: 0.95 }}
         aria-label="Open Chatbot"
       >
-        {isOpen ? <X size={20} strokeWidth={1.5} /> : <MessageSquare size={20} strokeWidth={1.5} />}
+        {isOpen ? <X size={20} strokeWidth={1.5} /> : <Coffee size={24} strokeWidth={1} />}
         {!isOpen && (
           <span className="chatbot-pulse-glow" />
         )}
@@ -134,13 +215,8 @@ export const Chatbot = () => {
             {/* Header */}
             <div className="chatbot-header">
               <div className="chatbot-header-profile">
-                <div className="chatbot-avatar">
-                  <Sparkles size={14} className="avatar-spark-icon" />
-                </div>
-                <div>
-                  <h3>Elysia</h3>
-                  <span className="chatbot-status">{statusLabel[language] || statusLabel.en}</span>
-                </div>
+                <h3>Elysia</h3>
+                <span className="chatbot-status">{statusLabel[language] || statusLabel.en}</span>
               </div>
               <button className="chatbot-close-btn" onClick={() => setIsOpen(false)}>
                 <X size={18} strokeWidth={1.5} />
@@ -176,6 +252,31 @@ export const Chatbot = () => {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Quick Suggestions Chips */}
+            <AnimatePresence>
+              {showOptions && (
+                <motion.div 
+                  className="chatbot-suggestions-container"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  {quickOptions.map(opt => (
+                    <button
+                      key={opt.id}
+                      className="chatbot-suggestion-chip"
+                      onClick={() => handleQuickOption(opt)}
+                      disabled={loading}
+                    >
+                      {opt.labels[language] || opt.labels.en}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Input Form */}
             <form className="chatbot-input-form" onSubmit={handleSendMessage}>
               <input
@@ -185,6 +286,14 @@ export const Chatbot = () => {
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
               />
+              <button 
+                type="button" 
+                onClick={() => setShowOptions(!showOptions)} 
+                className={`chatbot-toggle-options-btn ${showOptions ? 'active' : ''}`}
+                aria-label="Toggle suggestions"
+              >
+                <Sparkles size={16} strokeWidth={1.5} />
+              </button>
               <button type="submit" disabled={!input.trim() || loading} aria-label="Send message">
                 <Send size={16} strokeWidth={1.5} className={isRtl ? 'rotate-180' : ''} />
               </button>
