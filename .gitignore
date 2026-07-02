@@ -22,4 +22,8 @@ build/
 # Local database / data
 server/uploads/*
 !server/uploads/.gitkeep
-server/env_new.txt 
+server/env_new.txt
+server/db_log.txt
+server/db_init_log.txt
+server/global_errors.txt
+server/startup_test.txt
